@@ -3,6 +3,10 @@ assert Params
 assert ParamKeyType
 assert UnknownKeyName
 
+# Auto Assisted Lane Change parameters
+AALC_ENABLED = "AALCEnabled"
+AALC_MODE = "AALCMode"
+
 if __name__ == "__main__":
   import sys
 

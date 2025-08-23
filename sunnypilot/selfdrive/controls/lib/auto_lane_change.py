@@ -44,6 +44,7 @@ class AutoLaneChangeController:
 
     self.lane_change_set_timer = AutoLaneChangeMode.NUDGE
     self.lane_change_bsm_delay = False
+    self.aalc_enabled = False
 
     self.prev_brake_pressed = False
     self.auto_lane_change_allowed = False
@@ -60,9 +61,10 @@ class AutoLaneChangeController:
       self.prev_lane_change = False
 
   def read_params(self) -> None:
+    self.aalc_enabled = self.params.get_bool("AALCEnabled")
     self.lane_change_bsm_delay = self.params.get_bool("AutoLaneChangeBsmDelay")
     try:
-      self.lane_change_set_timer = int(self.params.get("AutoLaneChangeTimer", encoding="utf8"))
+      self.lane_change_set_timer = int(self.params.get("AALCMode", encoding="utf8"))
     except (ValueError, TypeError):
       self.lane_change_set_timer = AutoLaneChangeMode.NUDGE
 
@@ -89,6 +91,9 @@ class AutoLaneChangeController:
     # 2. Brake wasn't previously pressed
     # 3. We've waited long enough
 
+    if not self.aalc_enabled:
+      return False
+
     if self.lane_change_set_timer in (AutoLaneChangeMode.OFF, AutoLaneChangeMode.NUDGE):
       return False
 
@@ -101,6 +106,11 @@ class AutoLaneChangeController:
     return bool(self.lane_change_wait_timer > self.lane_change_delay)
 
   def update_lane_change(self, blindspot_detected: bool, brake_pressed: bool) -> None:
+    if not self.aalc_enabled:
+      self.auto_lane_change_allowed = False
+      self.lane_change_wait_timer = 0.0
+      return
+
     if brake_pressed and not self.prev_brake_pressed:
       self.prev_brake_pressed = brake_pressed
 

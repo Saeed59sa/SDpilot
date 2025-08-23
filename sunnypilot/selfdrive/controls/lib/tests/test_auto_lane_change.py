@@ -25,6 +25,7 @@ class TestAutoLaneChangeController:
   def setup_method(self):
     self.DH = DesireHelper()
     self.alc = AutoLaneChangeController(self.DH)
+    self.alc.aalc_enabled = True
 
   def _reset_states(self):
     self.alc.lane_change_bsm_delay = False

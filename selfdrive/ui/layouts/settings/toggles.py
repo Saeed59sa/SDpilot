@@ -30,6 +30,24 @@ class TogglesLayout(Widget):
   def __init__(self):
     super().__init__()
     self._params = Params()
+    self._aalc_toggle = toggle_item(
+      "Allow Auto Lane Change",
+      "Automatically start lane changes after a short delay when the turn signal is on.",
+      self._params.get_bool("AALCEnabled"),
+      icon="road.png",
+    )
+    self._aalc_mode = multiple_button_item(
+      "Auto Lane Change Delay",
+      "Delay before automatic lane changes begin.",
+      buttons=["Nudgeless", "0.5s", "1s", "2s", "3s"],
+      button_width=255,
+      selected_index=max(0, int(self._params.get("AALCMode") or b"1") - 1),
+      callback=self._set_aalc_mode,
+      icon="road.png",
+    )
+    self._aalc_toggle_prev = self._aalc_toggle.action_item.toggle.get_state()
+    self._aalc_mode_prev = self._aalc_mode.action_item.selected_button
+
     items = [
       toggle_item(
         "Enable openpilot",
@@ -81,6 +99,8 @@ class TogglesLayout(Widget):
         self._params.get_bool("RecordAudio"),
         icon="microphone.png",
       ),
+      self._aalc_toggle,
+      self._aalc_mode,
       toggle_item(
         "Use Metric System", DESCRIPTIONS["IsMetric"], self._params.get_bool("IsMetric"), icon="monitoring.png"
       ),
@@ -91,5 +111,18 @@ class TogglesLayout(Widget):
   def _render(self, rect):
     self._scroller.render(rect)
 
+    enabled = self._aalc_toggle.action_item.toggle.get_state()
+    if enabled != self._aalc_toggle_prev:
+      self._aalc_toggle_prev = enabled
+      self._params.put_bool("AALCEnabled", enabled)
+
+    mode_index = self._aalc_mode.action_item.selected_button
+    if mode_index != self._aalc_mode_prev:
+      self._aalc_mode_prev = mode_index
+      self._params.put("AALCMode", str(mode_index + 1))
+
   def _set_longitudinal_personality(self, button_index: int):
     self._params.put("LongitudinalPersonality", str(button_index))
+
+  def _set_aalc_mode(self, button_index: int):
+    self._params.put("AALCMode", str(button_index + 1))

@@ -45,7 +45,8 @@ def manager_init() -> None:
   ]
 
   sunnypilot_default_params: list[tuple[str, str | bytes]] = [
-    ("AutoLaneChangeTimer", "0"),
+    ("AALCEnabled", "0"),
+    ("AALCMode", "1"),
     ("AutoLaneChangeBsmDelay", "0"),
     ("BlindSpot", "0"),
     ("BlinkerMinLateralControlSpeed", "20"),  # MPH or km/h
